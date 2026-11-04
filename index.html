@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="labApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Experiment 8 - AngularJS Directives</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.3/angular.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 22px;
+            font-family: Arial, sans-serif;
+            background: #f3f6fa;
+            color: #263445;
+        }
+        .page {
+            max-width: 950px;
+            margin: auto;
+        }
+        header {
+            background: #2457a6;
+            color: white;
+            padding: 22px;
+            border-radius: 9px;
+            margin-bottom: 18px;
+        }
+        header h1 {
+            margin: 0 0 8px;
+            font-size: 25px;
+        } 
+        header p {
+            margin: 0;
+            line-height: 1.5;
+        }
+        section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 17px;
+            border: 1px solid #dce3ed;
+            border-radius: 8px;
+        } 
+        h2 {
+            color: #2457a6;
+            margin: 0 0 14px;
+            font-size: 20px;
+        }
+        h3 {
+            font-size: 16px;
+        }
+        input, textarea, select, button {
+            font: inherit;
+            padding: 10px;
+            border: 1px solid #bdc9d8;
+            border-radius: 5px;
+        }
+        input, textarea, select {
+            width: 100%;
+            background: white;
+        }
+        textarea {
+            min-height: 85px;
+            resize: vertical;
+        }
+        button {
+            background: #2457a6;
+            color: white;
+            border: 0;
+            cursor: pointer;
+        }      
+        button:hover {
+            background: #173f80;
+        }       
+        button:focus, input:focus, textarea:focus, select:focus {
+            outline: 2px solid #8bb7f0;
+            outline-offset: 1px;
+        }
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .result {
+            margin-top: 12px;
+            padding: 12px;
+            background: #eef4fc;
+            border-radius: 5px;
+            overflow-wrap: anywhere;
+        }       
+        li {
+            margin: 9px 0;
+            overflow-wrap: anywhere;
+        } 
+        .remove {
+            background: #b63838;
+            padding: 6px 10px;
+            margin-left: 8px;
+            width: auto;
+        }      
+        .muted {
+            color: #657386;
+            font-size: 14px;
+        }     
+        @media(max-width: 650px) {
+            body {
+                padding: 12px;
+            }
+            header, section {
+                padding: 16px;
+            }
+            header h1 {
+                font-size: 21px;
+            }
+            .row {
+                grid-template-columns: 1fr;
+            }
+            button:not(.remove) {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <header>
+            <h1>Working with AngularJS Directives</h1>
+            <p>Demonstration of AngularJS MVC concepts, directives, data binding and controllers.</p>
+        </header>
+        <section ng-controller="CommentController">
+            <h2>Simple Comment Box</h2>
+            <label for="comment">Post your comment</label>
+            <textarea id="comment" ng-model="newComment" placeholder="Enter your comment..."></textarea>
+            <p>
+                <button type="button" ng-click="addComment()">Post Comment</button>
+            </p>
+            <h3>Comments</h3>
+            <p class="muted" ng-if="comments.length === 0">No comments posted yet.</p>
+            <ul>
+                <li ng-repeat="comment in comments track by $index">
+                    {{comment}} 
+                    <button class="remove" type="button" ng-click="removeComment($index)">Remove</button>
+                </li>
+            </ul>
+        </section>
+        <section ng-controller="CalculatorController">
+            <h2>Simple Calculator</h2>
+            <div class="row">
+                <div>
+                    <label for="numberA">First number</label>
+                    <input id="numberA" type="number" ng-model="a">
+                </div>
+                <div>
+                    <label for="numberB">Second number</label>
+                    <input id="numberB" type="number" ng-model="b">
+                </div>
+            </div>
+            <div class="row">
+                <div>
+                    <label for="operator">Operation</label>
+                    <select id="operator" ng-model="operator">
+                        <option value="+">Addition (+)</option>
+                        <option value="-">Subtraction (-)</option>
+                        <option value="*">Multiplication (*)</option>
+                        <option value="/">Division (/)</option>
+                    </select>
+                </div>
+                <div style="display: flex; align-items: end;">
+                    <button type="button" ng-click="calculate()">Calculate</button>
+                </div>
+            </div>
+            <div class="result" aria-live="polite">
+                Result: <strong>{{resultText}}</strong>
+            </div>
+        </section>
+        <section ng-controller="TodoController">
+            <h2>Simple To-Do List</h2>
+            <div class="row">
+                <div>
+                    <label for="taskTitle">Task</label>
+                    <input id="taskTitle" type="text" ng-model="title" placeholder="Enter a task">
+                </div>
+                <div style="display: flex; align-items: end;">
+                    <button type="button" ng-click="addTask()">Add Task</button>
+                </div>
+            </div>
+            <p class="muted" ng-if="tasks.length === 0">Your task list is empty.</p>
+            <ul>
+                <li ng-repeat="task in tasks track by $index">
+                    {{task}} 
+                    <button class="remove" type="button" ng-click="removeTask($index)">Remove</button>
+                </li>
+            </ul>
+        </section>
+    </main>
+    <script>
+        var app = angular.module("labApp", []);
+        app.controller("CommentController", function($scope) {
+            $scope.comments = [];
+            $scope.newComment = "";
+            $scope.addComment = function() {
+                if ($scope.newComment && $scope.newComment.trim() !== "") {
+                    $scope.comments.push($scope.newComment.trim());
+                    $scope.newComment = "";
+                }
+            };
+            $scope.removeComment = function(index) {
+                $scope.comments.splice(index, 1);
+            };
+        });
+        app.controller("CalculatorController", function($scope) {
+            $scope.a = 0;
+            $scope.b = 0;
+            $scope.operator = "+";
+            $scope.resultText = "Enter numbers and select an operation.";
+            $scope.calculate = function() {
+                var x = Number($scope.a);
+                var y = Number($scope.b);
+                var answer;
+                if ($scope.operator === "+") {
+                    answer = x + y;
+                } else if ($scope.operator === "-") {
+                    answer = x - y;
+                } else if ($scope.operator === "*") {
+                    answer = x * y;
+                } else if ($scope.operator === "/") {
+                    if (y === 0) {
+                        $scope.resultText = "Cannot divide by zero.";
+                        return;
+                    }
+                    answer = x / y;
+                }
+                $scope.resultText = answer;
+            };
+        });
+        app.controller("TodoController", function($scope) {
+            $scope.tasks = [];
+            $scope.title = "";
+
+            $scope.addTask = function() {
+                if ($scope.title && $scope.title.trim() !== "") {
+                    $scope.tasks.push($scope.title.trim());
+                    $scope.title = "";
+                }
+            };
+            $scope.removeTask = function(index) {
+                $scope.tasks.splice(index, 1);
+            };
+        });
+    </script>
+</body>
+</html>
